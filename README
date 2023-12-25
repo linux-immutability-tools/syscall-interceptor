@@ -1,0 +1,1 @@
+Syscall-Intercept allows you to intercept syscalls issued by programs and then block or log them according to a config file.
