@@ -11778,9 +11778,6 @@ CC=$lt_save_CC
 # Only expand once:
 
 
-
-$ac_top_srcdir/parse_config.sh
-
 am__api_version='1.16'
 
 
@@ -13636,6 +13633,8 @@ unknown)
   ;;
 esac
 
+ac_config_commands="$ac_config_commands config.yml"
+
 ac_config_headers="$ac_config_headers config.h"
 
 ac_config_files="$ac_config_files Makefile src/Makefile"
@@ -14647,6 +14646,7 @@ do
   case $ac_config_target in
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+    "config.yml") CONFIG_COMMANDS="$CONFIG_COMMANDS config.yml" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
@@ -15891,6 +15891,7 @@ See \`config.log' for more details" "$LINENO" 5; }
   rm -f conftest-deps.mk
 }
  ;;
+    "config.yml":C) ./parse_config.sh > src/calls.h ;;
 
   esac
 done # for ac_tag
