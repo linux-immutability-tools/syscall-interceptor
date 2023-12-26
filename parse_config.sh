@@ -16,11 +16,12 @@ header_template = """
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/syscall.h>
 
 #define LOG_FILE "{PYLOGFILE}"
 
 struct syscall {{
-  char *name; // TODO: change to long
+  long callnum;
   bool log;
   bool block;
   char *arg0;
@@ -44,7 +45,7 @@ return {FIRSTVARNAME};
 
 structbuild_template = {
     "var_define": "struct syscall *{varname} = (struct syscall *) malloc(sizeof(struct syscall));\n",
-    "set_name": '{varname}->name = (char *) malloc(strlen("{name}")+1);\nstrcpy({varname}->name, "{name}");\n',
+    "set_name": '{varname}->callnum = {name};\n',
     "set_log": "{varname}->log = {log};\n",
     "set_block": "{varname}->block = {block};\n",
     "set_arg": '{varname}->{argname} = (char *) malloc(strlen("{arg}")+1);\nstrcpy({varname}->{argname}, "{arg}");\n',
@@ -88,14 +89,21 @@ class Syscall:
 
     def build_c_code(self, varname: str) -> str:
         c_code = structbuild_template["var_define"].format(varname=varname)
-        c_code = c_code + structbuild_template["set_name"].format(
-            varname=varname, name=self.name
-        )
+        if self.name.startswith("SYS_"):
+            c_code = c_code + structbuild_template["set_name"].format(
+                varname=varname, name=self.name.lower()
+            )
+        else:
+            c_code = c_code + structbuild_template["set_name"].format(
+                varname=varname, name="SYS_"+self.name.lower()
+            )
+
+
         c_code = c_code + structbuild_template["set_log"].format(
-            varname=varname, log=self.log
+            varname=varname, log=str(self.log).lower()
         )
         c_code = c_code + structbuild_template["set_block"].format(
-            varname=varname, block=self.block
+            varname=varname, block=str(self.block).lower()
         )
         if self.arg0 != "":
             c_code = c_code + structbuild_template["set_arg"].format(

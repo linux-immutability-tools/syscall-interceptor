@@ -1,4 +1,4 @@
-AC_INIT([syscall_intercept], [1.0], [axtlos@disroot.org])
+AC_INIT([syscall_interceptor], [1.0], [axtlos@disroot.org])
 LT_INIT
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIRS([m4])

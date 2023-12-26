@@ -6,3 +6,5 @@ config.log
 src/Makefile
 src/syscall_intercept
 src/.libs
+src/syscall.h
+src/unistd_64.h

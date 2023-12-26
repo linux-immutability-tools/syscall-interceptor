@@ -1,5 +1,5 @@
 #! /bin/sh
-# Generated automatically by config.status (syscall_intercept) 1.0
+# Generated automatically by config.status (syscall_interceptor) 1.0
 # Libtool was configured on host bonsai:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 

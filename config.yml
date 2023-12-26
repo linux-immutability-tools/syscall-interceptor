@@ -1,15 +1,15 @@
-log_file: /dev/kmsg
+log_file: /dev/log
 syscalls:
     - umount2:
         log: true
         block: true
         arg0: "/usr"
         arg1: "rw"
-    - remove:
+    - mount:
         log: false
         block: true
         arg0: "/etc/important"
-    - remove:
+    - fsmount:
         log: true
         block: false
         arg0: "/etc/abroot.conf"
