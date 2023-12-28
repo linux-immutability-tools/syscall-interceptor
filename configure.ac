@@ -14,7 +14,7 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AM_PROG_AR
 AC_CONFIG_COMMANDS([config.yml],
-                   [./parse_config.sh > src/calls.h])
+                   [python3 parse_config.py > src/calls.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
   Makefile

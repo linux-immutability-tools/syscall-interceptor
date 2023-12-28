@@ -1,14 +1,9 @@
-#!/bin/sh
-# parse_config.h
+# parse_config.py
 # author: axtlos / axtloss <axtlos@disroot.org>
 # SPDX-LICENSE: GPL-3.0-ONLY
 
 # Converts a yaml syscall-intercept configuration to a
 # header file to be used by syscall-intercept
-script=`cat $0 | tail -n +12`
-python -c "$script"
-exit
-# PYTHON:
 import yaml
 
 
