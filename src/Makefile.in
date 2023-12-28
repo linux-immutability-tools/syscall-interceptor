@@ -14,6 +14,10 @@
 
 @SET_MAKE@
 
+#bin_PROGRAMS = syscall_interceptor
+#syscall_interceptor_SOURCES = main.c
+#syscall_interceptor_CFLAGS = -lsyscall_intercept
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -130,18 +134,19 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libsyscall_intercept_la_LIBADD =
-am_libsyscall_intercept_la_OBJECTS = libsyscall_intercept_la-main.lo
-libsyscall_intercept_la_OBJECTS =  \
-	$(am_libsyscall_intercept_la_OBJECTS)
+libsyscall_interceptor_la_LIBADD =
+am_libsyscall_interceptor_la_OBJECTS =  \
+	libsyscall_interceptor_la-main.lo
+libsyscall_interceptor_la_OBJECTS =  \
+	$(am_libsyscall_interceptor_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libsyscall_intercept_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+libsyscall_interceptor_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libsyscall_intercept_la_CFLAGS) $(CFLAGS) \
-	$(libsyscall_intercept_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(libsyscall_interceptor_la_CFLAGS) $(CFLAGS) \
+	$(libsyscall_interceptor_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -157,7 +162,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libsyscall_intercept_la-main.Plo
+am__depfiles_remade = ./$(DEPDIR)/libsyscall_interceptor_la-main.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -177,8 +182,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libsyscall_intercept_la_SOURCES)
-DIST_SOURCES = $(libsyscall_intercept_la_SOURCES)
+SOURCES = $(libsyscall_interceptor_la_SOURCES)
+DIST_SOURCES = $(libsyscall_interceptor_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -214,9 +219,14 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -275,6 +285,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -322,10 +333,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libsyscall_intercept.la
-libsyscall_intercept_la_SOURCES = main.c
-libsyscall_intercept_la_CFLAGS = -fpic
-libsyscall_intercept_la_LDFLAGS = -version-info 1:0:0
+lib_LTLIBRARIES = libsyscall_interceptor.la
+libsyscall_interceptor_la_SOURCES = main.c
+libsyscall_interceptor_la_CFLAGS = -fpic -lsyscall_intercept
+libsyscall_interceptor_la_LDFLAGS = -version-info 1:0:0 -Og
 all: all-am
 
 .SUFFIXES:
@@ -395,8 +406,8 @@ clean-libLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libsyscall_intercept.la: $(libsyscall_intercept_la_OBJECTS) $(libsyscall_intercept_la_DEPENDENCIES) $(EXTRA_libsyscall_intercept_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libsyscall_intercept_la_LINK) -rpath $(libdir) $(libsyscall_intercept_la_OBJECTS) $(libsyscall_intercept_la_LIBADD) $(LIBS)
+libsyscall_interceptor.la: $(libsyscall_interceptor_la_OBJECTS) $(libsyscall_interceptor_la_DEPENDENCIES) $(EXTRA_libsyscall_interceptor_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libsyscall_interceptor_la_LINK) -rpath $(libdir) $(libsyscall_interceptor_la_OBJECTS) $(libsyscall_interceptor_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -404,7 +415,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsyscall_intercept_la-main.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsyscall_interceptor_la-main.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -433,12 +444,12 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-libsyscall_intercept_la-main.lo: main.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsyscall_intercept_la_CFLAGS) $(CFLAGS) -MT libsyscall_intercept_la-main.lo -MD -MP -MF $(DEPDIR)/libsyscall_intercept_la-main.Tpo -c -o libsyscall_intercept_la-main.lo `test -f 'main.c' || echo '$(srcdir)/'`main.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsyscall_intercept_la-main.Tpo $(DEPDIR)/libsyscall_intercept_la-main.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='main.c' object='libsyscall_intercept_la-main.lo' libtool=yes @AMDEPBACKSLASH@
+libsyscall_interceptor_la-main.lo: main.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsyscall_interceptor_la_CFLAGS) $(CFLAGS) -MT libsyscall_interceptor_la-main.lo -MD -MP -MF $(DEPDIR)/libsyscall_interceptor_la-main.Tpo -c -o libsyscall_interceptor_la-main.lo `test -f 'main.c' || echo '$(srcdir)/'`main.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsyscall_interceptor_la-main.Tpo $(DEPDIR)/libsyscall_interceptor_la-main.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='main.c' object='libsyscall_interceptor_la-main.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsyscall_intercept_la_CFLAGS) $(CFLAGS) -c -o libsyscall_intercept_la-main.lo `test -f 'main.c' || echo '$(srcdir)/'`main.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsyscall_interceptor_la_CFLAGS) $(CFLAGS) -c -o libsyscall_interceptor_la-main.lo `test -f 'main.c' || echo '$(srcdir)/'`main.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -573,7 +584,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/libsyscall_intercept_la-main.Plo
+		-rm -f ./$(DEPDIR)/libsyscall_interceptor_la-main.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -619,7 +630,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/libsyscall_intercept_la-main.Plo
+		-rm -f ./$(DEPDIR)/libsyscall_interceptor_la-main.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

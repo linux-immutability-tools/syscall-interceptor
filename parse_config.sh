@@ -25,18 +25,25 @@ struct syscall {{
   bool log;
   bool block;
   char *arg0;
+  long arg0_long;
   char *arg1;
+  long arg1_long;
   char *arg2;
+  long arg2_long;
   char *arg3;
+  long arg3_long;
   char *arg4;
+  long arg4_long;
   char *arg5;
+  long arg5_long;
 
   struct syscall *next;
   struct syscall *prev;
-}};
+}} syscall_default = {{-1, false, false, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, NULL}};
 
+typedef struct syscall syscall;
 
-struct syscall *
+syscall *
 get_calls() {{
 {PYSTRUCTBUILD}
 return {FIRSTVARNAME};
@@ -44,11 +51,12 @@ return {FIRSTVARNAME};
 """
 
 structbuild_template = {
-    "var_define": "struct syscall *{varname} = (struct syscall *) malloc(sizeof(struct syscall));\n",
+    "var_define": "syscall *{varname} = (struct syscall *) malloc(sizeof(syscall));\nmemcpy({varname}, &syscall_default, sizeof(syscall));\n",
     "set_name": '{varname}->callnum = {name};\n',
     "set_log": "{varname}->log = {log};\n",
     "set_block": "{varname}->block = {block};\n",
-    "set_arg": '{varname}->{argname} = (char *) malloc(strlen("{arg}")+1);\nstrcpy({varname}->{argname}, "{arg}");\n',
+    "set_arg_char": '{varname}->{argname} = (char *) malloc(strlen("{arg}")+1);\nstrcpy({varname}->{argname}, "{arg}");\n',
+    "set_arg_long": '{varname}->{argname}_long = {arg};\n',
     "set_next": "{varname}->next = {nextcall};\n",
     "set_prev": "{varname}->prev = {prevcall};\n",
 }
@@ -59,11 +67,17 @@ class Syscall:
     log: bool
     block: bool
     arg0: str = ""
+    arg_char: bool = True
     arg1: str = ""
+    arg1_char: bool = True
     arg2: str = ""
+    arg2_char: bool = True
     arg3: str = ""
+    arg3_char: bool = True
     arg4: str = ""
+    arg4_char: bool = True
     arg5: str = ""
+    arg5_char: bool = True
 
     def __init__(
         self,
@@ -71,21 +85,33 @@ class Syscall:
         log: bool,
         block: bool,
         arg0: str = "",
+        arg0_char: bool = True,
         arg1: str = "",
+        arg1_char: bool = True,
         arg2: str = "",
+        arg2_char: bool = True,
         arg3: str = "",
+        arg3_char: bool = True,
         arg4: str = "",
+        arg4_char: bool = True,
         arg5: str = "",
+        arg5_char: bool = True,
     ):
         self.name = name
         self.log = log
         self.block = block
         self.arg0 = arg0
+        self.arg0_char = arg0_char
         self.arg1 = arg1
+        self.arg1_char = arg1_char
         self.arg2 = arg2
+        self.arg2_char = arg2_char
         self.arg3 = arg3
+        self.arg3_char = arg3_char
         self.arg4 = arg4
+        self.arg4_char = arg4_char
         self.arg5 = arg5
+        self.arg5_char = arg5_char
 
     def build_c_code(self, varname: str) -> str:
         c_code = structbuild_template["var_define"].format(varname=varname)
@@ -106,29 +132,65 @@ class Syscall:
             varname=varname, block=str(self.block).lower()
         )
         if self.arg0 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg0", arg=self.arg0
-            )
+            if self.arg0_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg0", arg=self.arg0
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg0", arg=self.arg0
+                )
+
         if self.arg1 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg1", arg=self.arg1
-            )
+            if self.arg1_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg1", arg=self.arg1
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg1", arg=self.arg1
+                )
+
         if self.arg2 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg2", arg=self.arg2
-            )
+            if self.arg2_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg2", arg=self.arg2
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg2", arg=self.arg2
+                )
+
+
         if self.arg3 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg3", arg=self.arg3
-            )
+            if self.arg3_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg3", arg=self.arg3
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg3", arg=self.arg3
+                )
+
         if self.arg4 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg4", arg=self.arg4
-            )
+            if self.arg4_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg4", arg=self.arg4
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg4", arg=self.arg4
+                )
+
         if self.arg5 != "":
-            c_code = c_code + structbuild_template["set_arg"].format(
-                varname=varname, argname="arg5", arg=self.arg5
-            )
+            if self.arg5_char:
+                c_code = c_code + structbuild_template["set_arg_char"].format(
+                    varname=varname, argname="arg5", arg=self.arg5
+                )
+            else:
+                c_code = c_code + structbuild_template["set_arg_long"].format(
+                    varname=varname, argname="arg5", arg=self.arg5
+                )
         return c_code
 
     @staticmethod
@@ -141,16 +203,22 @@ class Syscall:
             call.block = bool(parsed.get("log"))
         if parsed.get("arg0") is not None:
             call.arg0 = str(parsed.get("arg0"))
+            call.arg0_char = bool(parsed.get("arg0_char"))
         if parsed.get("arg1") is not None:
             call.arg1 = str(parsed.get("arg1"))
+            call.arg1_char = bool(parsed.get("arg1_char"))
         if parsed.get("arg2") is not None:
             call.arg2 = str(parsed.get("arg2"))
+            call.arg2_char = bool(parsed.get("arg2_char"))
         if parsed.get("arg3") is not None:
             call.arg3 = str(parsed.get("arg3"))
+            call.arg3_char = bool(parsed.get("arg3_char"))
         if parsed.get("arg4") is not None:
             call.arg4 = str(parsed.get("arg4"))
+            call.arg4_char = bool(parsed.get("arg4_char"))
         if parsed.get("arg5") is not None:
             call.arg5 = str(parsed.get("arg5"))
+            call.arg5_char = bool(parsed.get("arg5_char"))
         return call
 
 
@@ -176,10 +244,16 @@ class Config:
                 linked_list_setup = linked_list_setup + structbuild_template[
                     "set_next"
                 ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
+                linked_list_setup = linked_list_setup + structbuild_template[
+                    "set_prev"
+                ].format(varname="call" + str(i), prevcall="NULL")
             elif i == len(self.syscalls):
                 linked_list_setup = linked_list_setup + structbuild_template[
                     "set_prev"
                 ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
+                linked_list_setup = linked_list_setup + structbuild_template[
+                    "set_next"
+                ].format(varname="call" + str(i), nextcall="NULL")
             else:
                 linked_list_setup = linked_list_setup + structbuild_template[
                     "set_prev"
@@ -189,6 +263,7 @@ class Config:
                 ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
 
         c_structs = c_structs + linked_list_setup
+        argtypes: list[str] = []
         c_code = header_template.format(
             PYLOGFILE=self.log_file,
             PYSTRUCTBUILD=c_structs,

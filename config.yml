@@ -4,12 +4,18 @@ syscalls:
         log: true
         block: true
         arg0: "/usr"
-        arg1: "rw"
-    - mount:
+        arg0_char: true
+        arg1: 1
+        arg1_char: false
+    - umount2:
         log: false
         block: true
-        arg0: "/etc/important"
+        arg0: "/home/xen/Projects/syscall-interceptor/test"
+        arg0_char: true
+        arg1: 2
+        arg1_char: false
     - fsmount:
         log: true
         block: false
         arg0: "/etc/abroot.conf"
+        arg0_char: true

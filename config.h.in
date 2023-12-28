@@ -9,6 +9,14 @@
 /* Define to 1 if you have the `' library (-l). */
 #undef HAVE_LIB
 
+/* Define to 1 if you have the <libsyscall_intercept_hook_point.h> header
+   file. */
+#undef HAVE_LIBSYSCALL_INTERCEPT_HOOK_POINT_H
+
+/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
+   to 0 otherwise. */
+#undef HAVE_MALLOC
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -32,6 +40,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if the system has the type `_Bool'. */
+#undef HAVE__BOOL
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
@@ -64,3 +75,6 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define to rpl_malloc if the replacement function should be used. */
+#undef malloc
