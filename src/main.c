@@ -93,19 +93,3 @@ static __attribute__((constructor)) void
 init(void) {
     intercept_hook_point = &hook;
 }
-/*
-int
-main (void)
-{
-  struct syscall *calls = get_calls();
-
-  puts ("Hello World!");
-  puts ("This is " PACKAGE_STRING ".");
-  puts (LOG_FILE);
-  //  printf ("%ld", calls->callnum);
-  long *result = (long *) malloc(LONG_MAX);
-  hook(SYS_umount2, 0, 0, 0, 0, 0, 0, result);
-  printf("%ld", *result);
-  return 0;
-}
-*/
