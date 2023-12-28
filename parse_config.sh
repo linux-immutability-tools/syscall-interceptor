@@ -21,6 +21,7 @@ header_template = """
 #define LOG_FILE "{PYLOGFILE}"
 
 struct syscall {{
+  char *name;
   long callnum;
   bool log;
   bool block;
@@ -39,7 +40,7 @@ struct syscall {{
 
   struct syscall *next;
   struct syscall *prev;
-}} syscall_default = {{-1, false, false, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, NULL}};
+}} syscall_default = {{NULL, -1, false, false, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, NULL}};
 
 typedef struct syscall syscall;
 
@@ -52,7 +53,7 @@ return {FIRSTVARNAME};
 
 structbuild_template = {
     "var_define": "syscall *{varname} = (struct syscall *) malloc(sizeof(syscall));\nmemcpy({varname}, &syscall_default, sizeof(syscall));\n",
-    "set_name": '{varname}->callnum = {name};\n',
+    "set_name": '{varname}->name = (char *) malloc(strlen("{name}")+1);\nstrcpy({varname}->name, "{name}");\n{varname}->callnum = {name};\n',
     "set_log": "{varname}->log = {log};\n",
     "set_block": "{varname}->block = {block};\n",
     "set_arg_char": '{varname}->{argname} = (char *) malloc(strlen("{arg}")+1);\nstrcpy({varname}->{argname}, "{arg}");\n',
@@ -200,7 +201,7 @@ class Syscall:
         if parsed.get("log") is not None:
             call.log = bool(parsed.get("log"))
         if parsed.get("block") is not None:
-            call.block = bool(parsed.get("log"))
+            call.block = bool(parsed.get("block"))
         if parsed.get("arg0") is not None:
             call.arg0 = str(parsed.get("arg0"))
             call.arg0_char = bool(parsed.get("arg0_char"))

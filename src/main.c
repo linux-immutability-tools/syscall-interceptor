@@ -7,6 +7,7 @@
 #include <syscall.h>
 #include <errno.h>
 #include <strings.h>
+#include <time.h>
 
 bool
 has_flag(long search_flag, long all_flags) {
@@ -50,6 +51,17 @@ match_args(syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4,
     return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;
 }
 
+void
+log_call(syscall *call) {
+    FILE *log_file;
+    time_t t = time(NULL);
+    struct tm timestruc = *localtime(&t);
+
+    log_file = fopen(LOG_FILE, "a");
+    fprintf(log_file, "Intercepted call %s at %d-%02d-%02d %02d:%02d:%02d\n", call->name, timestruc.tm_year+1900, timestruc.tm_mon+1, timestruc.tm_mday, timestruc.tm_hour, timestruc.tm_min, timestruc.tm_sec);
+    fclose(log_file);
+}
+
 static int
 hook (long syscall_number,
       long arg0, long arg1,
@@ -62,6 +74,9 @@ hook (long syscall_number,
         if (call->callnum == syscall_number
             && match_args(call, arg0, arg1, arg2, arg3, arg4, arg5))
         {
+            if (call->log) {
+                log_call(call);
+            }
             if (call->block) {
                 *result = -ENOTSUP;
                 return 0;

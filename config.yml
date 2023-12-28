@@ -1,4 +1,4 @@
-log_file: /dev/log
+log_file: ./log.txt
 syscalls:
     - umount2:
         log: true
@@ -14,8 +14,6 @@ syscalls:
         arg0_char: true
         arg1: 2
         arg1_char: false
-    - fsmount:
+    - getdents64:
         log: true
         block: false
-        arg0: "/etc/abroot.conf"
-        arg0_char: true
