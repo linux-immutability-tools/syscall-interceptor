@@ -1,19 +1,17 @@
 log_file: ./log.txt
 syscalls:
-    - umount2:
+    - openat:
         log: true
         block: true
-        arg0: "/usr"
-        arg0_char: true
-        arg1: 1
-        arg1_char: false
+        arg1: "/usr"
+        arg1_char: true
+        arg1_matchtype: "begins"
     - umount2:
         log: false
         block: true
         arg0: "/home/xen/Projects/syscall-interceptor/test"
         arg0_char: true
-        arg1: 2
-        arg1_char: false
+        arg0_matchtype: "full"
     - getdents64:
         log: true
         block: false

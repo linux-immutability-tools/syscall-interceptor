@@ -22,20 +22,26 @@ struct syscall {{
   bool block;
   char *arg0;
   long arg0_long;
+  int arg0_matchtype;
   char *arg1;
   long arg1_long;
+  int arg1_matchtype;
   char *arg2;
   long arg2_long;
+  int arg2_matchtype;
   char *arg3;
   long arg3_long;
+  int arg3_matchtype;
   char *arg4;
   long arg4_long;
+  int arg4_matchtype;
   char *arg5;
   long arg5_long;
+  int arg5_matchtype;
 
   struct syscall *next;
   struct syscall *prev;
-}} syscall_default = {{NULL, -1, false, false, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, NULL}};
+}} syscall_default = {{NULL, -1, false, false, NULL, -1, 0, NULL, -1, 0, NULL, -1, 0, NULL, -1, 0, NULL, -1, 0, NULL, -1, 0, NULL, NULL}};
 
 typedef struct syscall syscall;
 
@@ -53,6 +59,7 @@ structbuild_template = {
     "set_block": "{varname}->block = {block};\n",
     "set_arg_char": '{varname}->{argname} = (char *) malloc(strlen("{arg}")+1);\nstrcpy({varname}->{argname}, "{arg}");\n',
     "set_arg_long": '{varname}->{argname}_long = {arg};\n',
+    "set_arg_matchtype": '{varname}->{argname}_matchtype = {matchtype};\n',
     "set_next": "{varname}->next = {nextcall};\n",
     "set_prev": "{varname}->prev = {prevcall};\n",
 }
@@ -63,17 +70,23 @@ class Syscall:
     log: bool
     block: bool
     arg0: str = ""
-    arg_char: bool = True
+    arg0_char: bool = True
+    arg0_matchtype: str = "full"
     arg1: str = ""
     arg1_char: bool = True
+    arg1_matchtype: str = "full"
     arg2: str = ""
     arg2_char: bool = True
+    arg2_matchtype: str = "full"
     arg3: str = ""
     arg3_char: bool = True
+    arg3_matchtype: str = "full"
     arg4: str = ""
     arg4_char: bool = True
+    arg4_matchtype: str = "full"
     arg5: str = ""
     arg5_char: bool = True
+    arg5_matchtype: str = "full"
 
     def __init__(
         self,
@@ -82,32 +95,44 @@ class Syscall:
         block: bool,
         arg0: str = "",
         arg0_char: bool = True,
+        arg0_matchtype: str = "full",
         arg1: str = "",
         arg1_char: bool = True,
+        arg1_matchtype: str = "full",
         arg2: str = "",
         arg2_char: bool = True,
+        arg2_matchtype: str = "full",
         arg3: str = "",
         arg3_char: bool = True,
+        arg3_matchtype: str = "full",
         arg4: str = "",
         arg4_char: bool = True,
+        arg4_matchtype: str = "full",
         arg5: str = "",
         arg5_char: bool = True,
+        arg5_matchtype: str = "full",
     ):
         self.name = name
         self.log = log
         self.block = block
         self.arg0 = arg0
         self.arg0_char = arg0_char
+        self.arg0_matchtype = arg0_matchtype
         self.arg1 = arg1
         self.arg1_char = arg1_char
+        self.arg1_matchtype = arg1_matchtype
         self.arg2 = arg2
         self.arg2_char = arg2_char
+        self.arg2_matchtype = arg2_matchtype
         self.arg3 = arg3
         self.arg3_char = arg3_char
+        self.arg3_matchtype = arg3_matchtype
         self.arg4 = arg4
         self.arg4_char = arg4_char
+        self.arg4_matchtype = arg4_matchtype
         self.arg5 = arg5
         self.arg5_char = arg5_char
+        self.arg5_matchtype = arg5_matchtype
 
     def build_c_code(self, varname: str) -> str:
         c_code = structbuild_template["var_define"].format(varname=varname)
@@ -132,15 +157,20 @@ class Syscall:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg0", arg=self.arg0
                 )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg0", matchtype=0 if self.arg0_matchtype == "full" else -1 if self.arg0_matchtype == "begins" else 1
+                )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
                     varname=varname, argname="arg0", arg=self.arg0
                 )
-
         if self.arg1 != "":
             if self.arg1_char:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg1", arg=self.arg1
+                )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg1", matchtype=0 if self.arg1_matchtype == "full" else -1 if self.arg1_matchtype == "begins" else 1
                 )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
@@ -151,6 +181,9 @@ class Syscall:
             if self.arg2_char:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg2", arg=self.arg2
+                )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg2", matchtype=0 if self.arg2_matchtype == "full" else -1 if self.arg2_matchtype == "begins" else 1
                 )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
@@ -163,6 +196,9 @@ class Syscall:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg3", arg=self.arg3
                 )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg3", matchtype=0 if self.arg3_matchtype == "full" else -1 if self.arg3_matchtype == "begins" else 1
+                )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
                     varname=varname, argname="arg3", arg=self.arg3
@@ -173,6 +209,9 @@ class Syscall:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg4", arg=self.arg4
                 )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg4", matchtype=0 if self.arg4_matchtype == "full" else -1 if self.arg4_matchtype == "begins" else 1
+                )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
                     varname=varname, argname="arg4", arg=self.arg4
@@ -182,6 +221,9 @@ class Syscall:
             if self.arg5_char:
                 c_code = c_code + structbuild_template["set_arg_char"].format(
                     varname=varname, argname="arg5", arg=self.arg5
+                )
+                c_code = c_code + structbuild_template["set_arg_matchtype"].format(
+                    varname=varname, argname="arg5", matchtype=0 if self.arg5_matchtype == "full" else -1 if self.arg5_matchtype == "begins" else 1
                 )
             else:
                 c_code = c_code + structbuild_template["set_arg_long"].format(
@@ -200,21 +242,27 @@ class Syscall:
         if parsed.get("arg0") is not None:
             call.arg0 = str(parsed.get("arg0"))
             call.arg0_char = bool(parsed.get("arg0_char"))
+            call.arg0_matchtype = str(parsed.get("arg0_matchtype"))
         if parsed.get("arg1") is not None:
             call.arg1 = str(parsed.get("arg1"))
             call.arg1_char = bool(parsed.get("arg1_char"))
+            call.arg1_matchtype = str(parsed.get("arg1_matchtype"))
         if parsed.get("arg2") is not None:
             call.arg2 = str(parsed.get("arg2"))
             call.arg2_char = bool(parsed.get("arg2_char"))
+            call.arg2_matchtype = str(parsed.get("arg2_matchtype"))
         if parsed.get("arg3") is not None:
             call.arg3 = str(parsed.get("arg3"))
             call.arg3_char = bool(parsed.get("arg3_char"))
+            call.arg3_matchtype = str(parsed.get("arg3_matchtype"))
         if parsed.get("arg4") is not None:
             call.arg4 = str(parsed.get("arg4"))
             call.arg4_char = bool(parsed.get("arg4_char"))
+            call.arg4_matchtype = str(parsed.get("arg4_matchtype"))
         if parsed.get("arg5") is not None:
             call.arg5 = str(parsed.get("arg5"))
             call.arg5_char = bool(parsed.get("arg5_char"))
+            call.arg5_matchtype = str(parsed.get("arg5_matchtype"))
         return call
 
 

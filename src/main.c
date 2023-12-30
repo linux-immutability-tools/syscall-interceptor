@@ -15,12 +15,23 @@ has_flag(long search_flag, long all_flags) {
 }
 
 bool
-argcmp(long config_arg_long, char *config_arg_char, long sys_arg) {
+argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg) {
     if (!config_arg_char && config_arg_long != -1) {
         return has_flag(config_arg_long, sys_arg);
     } else if (config_arg_char) {
-        if (strcmp((char *)sys_arg, config_arg_char) == 0) {
-            return true;
+        switch (matchtype) {
+        case -1:
+            return strncmp(config_arg_char, (char*)sys_arg, strlen(config_arg_char)) == 0;
+        case 0:
+            if (strcmp((char *)sys_arg, config_arg_char) == 0)
+                return true;
+            break;
+        case 1:
+            if (strstr((char *)sys_arg, config_arg_char) != NULL)
+                return true;
+            break;
+        default:
+            return false;
         }
     }
     return false;
@@ -30,22 +41,22 @@ bool
 match_args(syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
     bool arg0_match = true, arg1_match = true, arg2_match = true, arg3_match = true, arg4_match = true, arg5_match = true;
     if (call->arg0 || call->arg0_long != -1) {
-        arg0_match = argcmp(call->arg0_long, call->arg0, arg0);
+        arg0_match = argcmp(call->arg0_matchtype, call->arg0_long, call->arg0, arg0);
     }
     if (call->arg1 || call->arg1_long != -1) {
-        arg1_match = argcmp(call->arg1_long, call->arg1, arg1);
+        arg1_match = argcmp(call->arg1_matchtype, call->arg1_long, call->arg1, arg1);
     }
     if (call->arg2 || call->arg2_long != -1) {
-        arg2_match = argcmp(call->arg2_long, call->arg2, arg2);
+        arg2_match = argcmp(call->arg2_matchtype, call->arg2_long, call->arg2, arg2);
     }
     if (call->arg3 || call->arg3_long != -1) {
-        arg3_match = argcmp(call->arg3_long, call->arg3, arg3);
+        arg3_match = argcmp(call->arg3_matchtype, call->arg3_long, call->arg3, arg3);
     }
     if (call->arg4 || call->arg4_long != -1) {
-        arg4_match = argcmp(call->arg4_long, call->arg4, arg4);
+        arg4_match = argcmp(call->arg4_matchtype, call->arg4_long, call->arg4, arg4);
     }
     if (call->arg5 || call->arg5_long != -1) {
-        arg5_match = argcmp(call->arg5_long, call->arg5, arg5);
+        arg5_match = argcmp(call->arg5_matchtype, call->arg5_long, call->arg5, arg5);
     }
 
     return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;

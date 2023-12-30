@@ -28,6 +28,18 @@ syscalls:
     arg0: 3
     arg0_char: false
 ```
+In the case, that the argument is a char pointer, it can be specified how the argument should be matched, possible options are "full", "begins" and "contains":
+```
+log_file: /some/random/path
+syscalls:
+  - umount2
+    log: true
+    block: true
+    arg0: "/some/path"
+    arg0_char: true
+    arg0_matchtype: "begins"
+```
+In this example, syscall interceptor checks if the argument in the syscall begins with "/some/path", meaning that trying to call `umount2` on `/some/path` or `/some/path/nested` would be blocked.
 
 In the future an extra tool may be developed to either fully generate or at least assist with the generation of a configuration file.
 
