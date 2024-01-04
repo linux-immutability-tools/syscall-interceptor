@@ -1,4 +1,6 @@
 #include <config.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <calls.h>
 #include <limits.h>
 #include <stdio.h>
@@ -8,6 +10,12 @@
 #include <errno.h>
 #include <strings.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <limits.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 
 bool
 has_flag(long search_flag, long all_flags) {
@@ -38,7 +46,7 @@ argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg)
 }
 
 bool
-match_args(syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
+match_args(conf_syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
     bool arg0_match = true, arg1_match = true, arg2_match = true, arg3_match = true, arg4_match = true, arg5_match = true;
     if (call->arg0 || call->arg0_long != -1) {
         arg0_match = argcmp(call->arg0_matchtype, call->arg0_long, call->arg0, arg0);
@@ -63,7 +71,7 @@ match_args(syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4,
 }
 
 void
-log_call(syscall *call) {
+log_call(conf_syscall *call) {
     FILE *log_file;
     time_t t = time(NULL);
     struct tm timestruc = *localtime(&t);
@@ -73,6 +81,30 @@ log_call(syscall *call) {
     fclose(log_file);
 }
 
+// Function origin:
+// https://www.gnu.org/software/libc/manual/html_node/Symbolic-Links.html#index-readlink
+char *
+readlink_malloc(const char *filename) {
+    size_t size = 50;
+    char *buffer = NULL;
+
+    while (true) {
+        buffer = reallocarray(buffer, size, 2);
+        if (buffer == 0) {
+            puts("Virtual memory exhausted");
+            exit(1);
+        }
+        size *= 2;
+        ssize_t nchars = readlink(filename, buffer, size);
+        if (nchars < 0) {
+            free(buffer);
+            return NULL;
+        }
+        if (nchars < size)
+            return buffer;
+    }
+}
+
 static int
 hook (long syscall_number,
       long arg0, long arg1,
@@ -80,11 +112,23 @@ hook (long syscall_number,
       long arg4, long arg5,
       long *result) {
 
-    syscall *call = get_calls();
+    conf_syscall *call = get_calls();
     while(true) {
         if (call->callnum == syscall_number
             && match_args(call, arg0, arg1, arg2, arg3, arg4, arg5))
         {
+            if (syscall_number == 442) {
+                if (arg1 == 0) {
+                    break;
+                }
+                char *linkname, *procstat;
+                pid_t pid = getpid();
+                procstat = malloc(sizeof(char)*11+sizeof(pid_t)+sizeof(long));
+                sprintf(procstat, "/proc/%d/fd/%ld", pid, arg0);
+                puts(procstat);
+                linkname = readlink_malloc(procstat);
+                puts(linkname);
+            }
             if (call->log) {
                 log_call(call);
             }
