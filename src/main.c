@@ -1,21 +1,13 @@
-#include <config.h>
+// copyright axtlos <axtlos@disroot.org>
+// SPDX-LICENSE: LGPL-3.0-ONLY
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <calls.h>
-#include <limits.h>
-#include <stdio.h>
+#include "calls.h"
 #include <libsyscall_intercept_hook_point.h>
-#include <string.h>
-#include <syscall.h>
 #include <errno.h>
-#include <strings.h>
 #include <time.h>
-#include <sys/stat.h>
-#include <limits.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
-
 
 bool
 has_flag(long search_flag, long all_flags) {
@@ -146,17 +138,18 @@ cmpfinish:
     return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;
 }
 
-void
-log_call(conf_syscall *call) {
+void log_call(conf_syscall *call) {
     FILE *log_file;
     time_t t = time(NULL);
     struct tm timestruc = *localtime(&t);
 
     log_file = fopen(LOG_FILE, "a");
-    fprintf(log_file, "Intercepted call %s at %d-%02d-%02d %02d:%02d:%02d\n", call->name, timestruc.tm_year+1900, timestruc.tm_mon+1, timestruc.tm_mday, timestruc.tm_hour, timestruc.tm_min, timestruc.tm_sec);
+    fprintf(log_file, "Intercepted call %s at %d-%02d-%02d %02d:%02d:%02d\n",
+            call->name, timestruc.tm_year + 1900, timestruc.tm_mon + 1,
+            timestruc.tm_mday, timestruc.tm_hour, timestruc.tm_min,
+            timestruc.tm_sec);
     fclose(log_file);
 }
-
 static int
 hook (long syscall_number,
       long arg0, long arg1,

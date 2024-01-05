@@ -1,6 +1,6 @@
 # parse_config.py
 # author: axtlos / axtloss <axtlos@disroot.org>
-# SPDX-LICENSE: GPL-3.0-ONLY
+# SPDX-LICENSE: LGPL-3.0-ONLY
 
 # Converts a yaml syscall-intercept configuration to a
 # header file to be used by syscall-intercept
