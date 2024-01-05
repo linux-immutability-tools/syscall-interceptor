@@ -92,7 +92,7 @@ class Argument:
         elif self.content != "" and not self.isChar:
             c_code = c_code+structbuild_template["set_arg_long"].format(varname=varname, argname="arg"+argnum, arg=self.content)
         if self.isFdesc:
-            c_code = c_code+structbuild_template["set_arg_isfdesc"].format(varname=varname, argname="arg"+argnum, isfdesc=self.isFdesc)
+            c_code = c_code+structbuild_template["set_arg_isfdesc"].format(varname=varname, argname="arg"+argnum, isfdesc=str(self.isFdesc).lower())
         return c_code
 
     @staticmethod
@@ -205,29 +205,33 @@ class Config:
             i = i - 1
             c_structs = c_structs + "\n"
 
-        linked_list_setup = ""
-        for i in range(1, len(self.syscalls) + 1):
-            if i == 1:
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_next"
-                ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_prev"
-                ].format(varname="call" + str(i), prevcall="NULL")
-            elif i == len(self.syscalls):
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_prev"
-                ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_next"
-                ].format(varname="call" + str(i), nextcall="NULL")
-            else:
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_prev"
-                ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
-                linked_list_setup = linked_list_setup + structbuild_template[
-                    "set_next"
-                ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
+        linked_list_setup: str = ""
+        if len(self.syscalls) == 1:
+            linked_list_setup = linked_list_setup + structbuild_template["set_next"].format(varname="call1", nextcall="NULL")
+            linked_list_setup = linked_list_setup + structbuild_template["set_prev"].format(varname="call1", prevcall="NULL")
+        else:
+            for i in range(1, len(self.syscalls) + 1):
+                if i == 1:
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_next"
+                    ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_prev"
+                    ].format(varname="call" + str(i), prevcall="NULL")
+                elif i == len(self.syscalls):
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_prev"
+                    ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_next"
+                    ].format(varname="call" + str(i), nextcall="NULL")
+                else:
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_prev"
+                    ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
+                    linked_list_setup = linked_list_setup + structbuild_template[
+                        "set_next"
+                    ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
 
         c_structs = c_structs + linked_list_setup
         c_code = header_template.format(
