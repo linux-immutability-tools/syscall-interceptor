@@ -1,6 +1,12 @@
 autom4te.cache
+configure
+ltmain.sh
+m4/
+missing
+stamp-h1
 configure~
 config.h
+config.h.in
 config.h.in~
 config.log
 Makefile
