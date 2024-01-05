@@ -45,46 +45,9 @@ argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg)
     return false;
 }
 
-bool
-match_args(conf_syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
-    bool arg0_match = true, arg1_match = true, arg2_match = true, arg3_match = true, arg4_match = true, arg5_match = true;
-    if (call->arg0 || call->arg0_long != -1) {
-        arg0_match = argcmp(call->arg0_matchtype, call->arg0_long, call->arg0, arg0);
-    }
-    if (call->arg1 || call->arg1_long != -1) {
-        arg1_match = argcmp(call->arg1_matchtype, call->arg1_long, call->arg1, arg1);
-    }
-    if (call->arg2 || call->arg2_long != -1) {
-        arg2_match = argcmp(call->arg2_matchtype, call->arg2_long, call->arg2, arg2);
-    }
-    if (call->arg3 || call->arg3_long != -1) {
-        arg3_match = argcmp(call->arg3_matchtype, call->arg3_long, call->arg3, arg3);
-    }
-    if (call->arg4 || call->arg4_long != -1) {
-        arg4_match = argcmp(call->arg4_matchtype, call->arg4_long, call->arg4, arg4);
-    }
-    if (call->arg5 || call->arg5_long != -1) {
-        arg5_match = argcmp(call->arg5_matchtype, call->arg5_long, call->arg5, arg5);
-    }
-
-    return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;
-}
-
-void
-log_call(conf_syscall *call) {
-    FILE *log_file;
-    time_t t = time(NULL);
-    struct tm timestruc = *localtime(&t);
-
-    log_file = fopen(LOG_FILE, "a");
-    fprintf(log_file, "Intercepted call %s at %d-%02d-%02d %02d:%02d:%02d\n", call->name, timestruc.tm_year+1900, timestruc.tm_mon+1, timestruc.tm_mday, timestruc.tm_hour, timestruc.tm_min, timestruc.tm_sec);
-    fclose(log_file);
-}
-
 // Function origin:
 // https://www.gnu.org/software/libc/manual/html_node/Symbolic-Links.html#index-readlink
-char *
-readlink_malloc(const char *filename) {
+char *readlink_malloc(const char *filename) {
     size_t size = 50;
     char *buffer = NULL;
 
@@ -100,9 +63,98 @@ readlink_malloc(const char *filename) {
             free(buffer);
             return NULL;
         }
-        if (nchars < size)
+        if ((unsigned)nchars < size)
             return buffer;
     }
+}
+
+char *
+get_fdesc(long arg) {
+    char *linkname, *procstat;
+    pid_t pid = getpid();
+    int proc = asprintf(&procstat, "/proc/%d/fd/%ld", pid, arg);
+    if (proc < 0) {
+        return NULL;
+    }
+    linkname = readlink_malloc(procstat);
+    return linkname;
+}
+
+bool
+match_args(conf_syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
+    bool arg0_match = true, arg1_match = true, arg2_match = true, arg3_match = true, arg4_match = true, arg5_match = true;
+    if (call->arg0 || call->arg0_long != -1) {
+        long arg = arg0;
+        if (call->arg0_fdesc == true) {
+            arg = (long)get_fdesc(arg0);
+            if (arg <= 0)
+                goto arg1cmp;
+        }
+        arg0_match = argcmp(call->arg0_matchtype, call->arg0_long, call->arg0, arg);
+    }
+arg1cmp:
+    if (call->arg1 || call->arg1_long != -1) {
+        long arg = arg1;
+        if (call->arg1_fdesc == true) {
+            arg = (long)get_fdesc(arg1);
+            if (arg <= 0)
+                goto arg2cmp;
+        }
+        arg1_match = argcmp(call->arg1_matchtype, call->arg1_long, call->arg1, arg);
+    }
+arg2cmp:
+    if (call->arg2 || call->arg2_long != -1) {
+        long arg = arg2;
+        if (call->arg2_fdesc == true) {
+            arg = (long)get_fdesc(arg2);
+            if (arg <= 0)
+                goto arg3cmp;
+        }
+        arg2_match = argcmp(call->arg2_matchtype, call->arg2_long, call->arg2, arg);
+    }
+arg3cmp:
+    if (call->arg3 || call->arg3_long != -1) {
+        long arg = arg3;
+        if (call->arg3_fdesc == true) {
+            arg = (long)get_fdesc(arg3);
+            if (arg <= 0)
+                goto arg4cmp;
+        }
+        arg3_match = argcmp(call->arg3_matchtype, call->arg3_long, call->arg3, arg);
+    }
+arg4cmp:
+    if (call->arg4 || call->arg4_long != -1) {
+        long arg = arg4;
+        if (call->arg4_fdesc == true) {
+            arg = (long)get_fdesc(arg4);
+            if (arg <= 0)
+                goto arg5cmp;
+        }
+        arg4_match = argcmp(call->arg4_matchtype, call->arg4_long, call->arg4, arg);
+    }
+arg5cmp:
+    if (call->arg5 || call->arg5_long != -1) {
+        long arg = arg5;
+        if (call->arg5_fdesc == true) {
+            arg = (long)get_fdesc(arg5);
+            if (arg <= 0)
+                goto cmpfinish;
+        }
+        arg5_match = argcmp(call->arg5_matchtype, call->arg5_long, call->arg5, arg);
+    }
+cmpfinish:
+    return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;
+}
+
+void
+log_call(conf_syscall *call) {
+    FILE *log_file;
+    time_t t = time(NULL);
+    struct tm timestruc = *localtime(&t);
+
+    log_file = fopen(LOG_FILE, "a");
+    fprintf(log_file, "Intercepted call %s at %d-%02d-%02d %02d:%02d:%02d\n", call->name, timestruc.tm_year+1900, timestruc.tm_mon+1, timestruc.tm_mday, timestruc.tm_hour, timestruc.tm_min, timestruc.tm_sec);
+    fclose(log_file);
 }
 
 static int
@@ -117,18 +169,6 @@ hook (long syscall_number,
         if (call->callnum == syscall_number
             && match_args(call, arg0, arg1, arg2, arg3, arg4, arg5))
         {
-            if (syscall_number == 442) {
-                if (arg1 == 0) {
-                    break;
-                }
-                char *linkname, *procstat;
-                pid_t pid = getpid();
-                procstat = malloc(sizeof(char)*11+sizeof(pid_t)+sizeof(long));
-                sprintf(procstat, "/proc/%d/fd/%ld", pid, arg0);
-                puts(procstat);
-                linkname = readlink_malloc(procstat);
-                puts(linkname);
-            }
             if (call->log) {
                 log_call(call);
             }
