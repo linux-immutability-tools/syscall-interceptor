@@ -1,45 +1,54 @@
 // copyright axtlos <axtlos@disroot.org>
 // SPDX-LICENSE: LGPL-3.0-ONLY
 
-#include <stdlib.h>
-#include <stdio.h>
-#include "calls.h"
-#include <libsyscall_intercept_hook_point.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <libsyscall_intercept_hook_point.h>
+#include "calls.h"
 
-bool
-has_flag(long search_flag, long all_flags) {
+inline bool
+has_flag(long search_flag, long all_flags)
+{
     return (all_flags & search_flag) == search_flag;
 }
 
 bool
-argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg) {
-    if (!config_arg_char && config_arg_long != -1) {
-        return has_flag(config_arg_long, sys_arg);
-    } else if (config_arg_char) {
+argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg)
+{
+    bool return_val = false;
+
+    if (!config_arg_char && config_arg_long != -1)
+        return_val = has_flag(config_arg_long, sys_arg);
+    else if (config_arg_char)
         switch (matchtype) {
         case -1:
-            return strncmp(config_arg_char, (char*)sys_arg, strlen(config_arg_char)) == 0;
+            if (strncmp(config_arg_char, (char*)sys_arg, strlen(config_arg_char)) == 0)
+                return_val = true;
+            break;
         case 0:
             if (strcmp((char *)sys_arg, config_arg_char) == 0)
-                return true;
+                return_val = true;
             break;
         case 1:
             if (strstr((char *)sys_arg, config_arg_char) != NULL)
-                return true;
+                return_val = true;
             break;
         default:
-            return false;
+            return_val = false;
         }
-    }
-    return false;
+
+    return return_val;
 }
 
 // Function origin:
 // https://www.gnu.org/software/libc/manual/html_node/Symbolic-Links.html#index-readlink
-char *readlink_malloc(const char *filename) {
+char *
+readlink_malloc(const char *filename)
+{
     size_t size = 50;
     char *buffer = NULL;
 
@@ -61,19 +70,23 @@ char *readlink_malloc(const char *filename) {
 }
 
 char *
-get_fdesc(long arg) {
+get_fdesc(long arg)
+{
     char *linkname, *procstat;
     pid_t pid = getpid();
     int proc = asprintf(&procstat, "/proc/%d/fd/%ld", pid, arg);
-    if (proc < 0) {
-        return NULL;
-    }
-    linkname = readlink_malloc(procstat);
+
+    if (proc < 0)
+        linkname = NULL;
+    else
+        linkname = readlink_malloc(procstat);
+
     return linkname;
 }
 
 bool
-match_args(conf_syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5) {
+match_args(conf_syscall *call, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5)
+{
     bool arg0_match = true, arg1_match = true, arg2_match = true, arg3_match = true, arg4_match = true, arg5_match = true;
     if (call->arg0 || call->arg0_long != -1) {
         long arg = arg0;
@@ -138,7 +151,8 @@ cmpfinish:
     return arg0_match && arg1_match && arg2_match && arg3_match && arg4_match && arg5_match;
 }
 
-void log_call(conf_syscall *call) {
+void log_call(conf_syscall *call)
+{
     FILE *log_file;
     time_t t = time(NULL);
     struct tm timestruc = *localtime(&t);
@@ -151,33 +165,27 @@ void log_call(conf_syscall *call) {
     fclose(log_file);
 }
 static int
-hook (long syscall_number,
-      long arg0, long arg1,
-      long arg2, long arg3,
-      long arg4, long arg5,
-      long *result) {
-
+hook(long syscall_number, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5, long *result)
+{
     conf_syscall *call = get_calls();
     while(true) {
-        if (call->callnum == syscall_number
-            && match_args(call, arg0, arg1, arg2, arg3, arg4, arg5))
-        {
-            if (call->log) {
+        if (call->callnum == syscall_number && match_args(call, arg0, arg1, arg2, arg3, arg4, arg5)) {
+            if (call->log)
                 log_call(call);
-            }
             if (call->block) {
                 *result = -ENOTSUP;
                 return 0;
             }
         }
-        if (!call->next) {
+        if (!call->next)
             return 1;
-        }
+
         call = call->next;
     }
 }
 
 static __attribute__((constructor)) void
-init(void) {
+init(void)
+{
     intercept_hook_point = &hook;
 }
