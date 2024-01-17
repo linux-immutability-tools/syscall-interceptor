@@ -41,7 +41,6 @@ argcmp(int matchtype, long config_arg_long, char *config_arg_char, long sys_arg)
             default:
                 return_val = false;
         }
-
     return return_val;
 }
 
@@ -188,24 +187,22 @@ log_call(conf_syscall * call)
 static int
 hook(long syscall_number, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5, long *result)
 {
-    conf_syscall *call = get_calls ();
-    while (true)
+    if (finishInit == 0)
+        get_calls ();
+    for (int i=0; i < calls_size; i++)
     {
-        if (call->callnum == syscall_number && match_args (call, arg0, arg1, arg2, arg3, arg4, arg5))
+        if (calls[i].callnum == syscall_number && match_args (&calls[i], arg0, arg1, arg2, arg3, arg4, arg5))
         {
-            if (call->log)
-                log_call (call);
-            if (call->block)
+            if (calls[i].log)
+                log_call (&calls[i]);
+            if (calls[i].block)
             {
                 *result = -ENOTSUP;
                 return 0;
             }
         }
-        if (!call->next)
-            return 1;
-
-        call = call->next;
     }
+    return 1;
 }
 
 static __attribute__ ((constructor))

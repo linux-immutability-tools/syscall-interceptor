@@ -50,11 +50,13 @@ struct conf_syscall {{
 }} syscall_default = {{NULL, -1, false, false, NULL, -1, 0, false, NULL, -1, 0, false, NULL, -1, 0, false, NULL, -1, 0, false, NULL, -1, 0, false, NULL, -1, 0, false, NULL, NULL}};
 
 typedef struct conf_syscall conf_syscall;
+const int calls_size = {CALLLEN};
+conf_syscall calls[{CALLLEN}];
+int finishInit = 0;
 
-conf_syscall *
-get_calls() {{
+void get_calls() {{
 {PYSTRUCTBUILD}
-return {FIRSTVARNAME};
+finishInit = 1;
 }};
 """
 
@@ -67,8 +69,7 @@ structbuild_template = {
     "set_arg_long": '{varname}->{argname}_long = {arg};\n',
     "set_arg_matchtype": '{varname}->{argname}_matchtype = {matchtype};\n',
     "set_arg_isfdesc": '{varname}->{argname}_fdesc = {isfdesc};\n',
-    "set_next": "{varname}->next = {nextcall};\n",
-    "set_prev": "{varname}->prev = {prevcall};\n",
+    "set_array": "calls[{num}] = *{varname};\n",
 }
 
 
@@ -205,39 +206,15 @@ class Config:
             i = i - 1
             c_structs = c_structs + "\n"
 
-        linked_list_setup: str = ""
-        if len(self.syscalls) == 1:
-            linked_list_setup = linked_list_setup + structbuild_template["set_next"].format(varname="call1", nextcall="NULL")
-            linked_list_setup = linked_list_setup + structbuild_template["set_prev"].format(varname="call1", prevcall="NULL")
-        else:
-            for i in range(1, len(self.syscalls) + 1):
-                if i == 1:
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_next"
-                    ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_prev"
-                    ].format(varname="call" + str(i), prevcall="NULL")
-                elif i == len(self.syscalls):
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_prev"
-                    ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_next"
-                    ].format(varname="call" + str(i), nextcall="NULL")
-                else:
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_prev"
-                    ].format(varname="call" + str(i), prevcall="call" + str(i - 1))
-                    linked_list_setup = linked_list_setup + structbuild_template[
-                        "set_next"
-                    ].format(varname="call" + str(i), nextcall="call" + str(i + 1))
+        call_arr_setup: str = ""
+        for i in range(0, len(self.syscalls)):
+            call_arr_setup = call_arr_setup + structbuild_template["set_array"].format(num=str(i), varname="call"+str(i+1))
 
-        c_structs = c_structs + linked_list_setup
+        c_structs = c_structs + call_arr_setup
         c_code = header_template.format(
             PYLOGFILE=self.log_file,
             PYSTRUCTBUILD=c_structs,
-            FIRSTVARNAME="call1",
+            CALLLEN=len(self.syscalls),
         )
         return c_code
 
