@@ -1,6 +1,7 @@
 /* copyright axtlos <axtlos@disroot.org>
  * SPDX-LICENSE: LGPL-3.0-ONLY */
 
+#define _GNU_SOURCE // Debian build fix
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
