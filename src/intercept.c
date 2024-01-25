@@ -1,3 +1,7 @@
+// intercept.c
+// author: axtlos / axtloss <axtlos@disroot.org>
+// SPDX-LICENSE: GPL-2.0-ONLY
+
 #include <asm/unistd_64.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
